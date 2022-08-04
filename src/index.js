@@ -6,7 +6,7 @@ const filepathNormalize = (filepath) => path.resolve(process.cwd(), filepath);
 
 const createObjFromFile = (filepath) => JSON.parse(fs.readFileSync(filepathNormalize(filepath)));
 
-export const genDiff = (filepath1, filepath2) => {
+const genDiff = (filepath1, filepath2) => {
   const file1Obj = createObjFromFile(filepath1);
   const file2Obj = createObjFromFile(filepath2);
 
