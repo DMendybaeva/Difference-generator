@@ -1,43 +1,35 @@
 import _ from 'lodash';
-import fs from 'fs';
-import path from 'path';
 import getParser from './parsers.js';
+import getFormattedData from './formatters/stylish.js';
 
-const EMPTY = '    ';
-const PLUS = '  + ';
-const MINUS = '  - ';
+const createObjFromFile = (filepath) => getParser(filepath);
 
-const getFilePath = (filepath) => path.resolve(process.cwd(), filepath);
-
-const createObjFromFile = (filepath, ext) => getParser(fs.readFileSync(getFilePath(filepath)), ext);
+const isNested = (obj) => _.isPlainObject(obj);
 
 const genDiff = (filepath1, filepath2) => {
-  const file1ext = path.extname(filepath1);
-  const file1Obj = createObjFromFile(filepath1, file1ext);
+  const file1Obj = createObjFromFile(filepath1);
 
-  const file2ext = path.extname(filepath2);
-  const file2Obj = createObjFromFile(filepath2, file2ext);
+  const file2Obj = createObjFromFile(filepath2);
 
-  const objKeys = Object.keys({ ...file1Obj, ...file2Obj }).sort();
-  const result = [];
-
-  // eslint-disable-next-line no-restricted-syntax
-  for (const key of objKeys) {
-    if (_.has(file1Obj, key) && _.has(file2Obj, key)) {
-      if (file1Obj[key] === file2Obj[key]) {
-        result.push([EMPTY, `${key}: `, `${file1Obj[key]}`].join(''));
-      } else if (file1Obj[key] !== file2Obj[key]) {
-        result.push([MINUS, `${key}: `, `${file1Obj[key]}`].join(''));
-        result.push([PLUS, `${key}: `, `${file2Obj[key]}`].join(''));
+  const iter = (obj1, obj2) => {
+    const objKeys = Object.keys({ ...file1Obj, ...file2Obj }).sort();
+    return objKeys.map((key) => {
+      if (!_.has(file1Obj, key)) {
+        return { key, type: 'added', value: file2Obj[key] };
       }
-    } else if (!_.has(file1Obj, key)) {
-      result.push([PLUS, `${key}: `, `${file2Obj[key]}`].join(''));
-    } else if (!_.has(file2Obj, key)) {
-      result.push([MINUS, `${key}: `, `${file1Obj[key]}`].join(''));
-    }
-  }
-  const resultString = `{\n${result.join('\n')}\n}`;
-  return resultString;
+      if (!_.has(file2Obj, key)) {
+        return { key, type: 'remove', value: file1Obj[key] };
+      }
+      if (isNested(obj1[key], obj2[key])) {
+        return { key, type: 'nested', children: iter(obj1[key], obj2[key]) };
+      }
+      return file1Obj[key] === file2Obj[key]
+        ? { key, type: 'unchanged', value: file1Obj[key] }
+        : { key, type: 'changed', valuesObj: { oldValue: obj1[key], newValue: obj2[key] } };
+    });
+  };
+  const nodes = iter(file1Obj, file2Obj);
+  return getFormattedData(nodes);
 };
 
 export default genDiff;
