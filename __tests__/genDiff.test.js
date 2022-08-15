@@ -14,11 +14,12 @@ const __dirname = dirname(__filename);
 
 const getFixturePath = (fileName) => path.join(__dirname, '..', '__fixtures__', fileName);
 
-const formats = ['stylish', 'plain'];
+const formats = ['stylish', 'plain', 'json'];
 const extensions = [['.json', '.yaml'], ['.json', '.json'], ['.yaml', '.yaml']];
 const testEmptyData = [
   { format: 'stylish', expected: '{\n\n}' },
   { format: 'plain', expected: ''.toString() },
+  { format: 'json', expected: '[]' },
 ];
 
 describe('test gendiff', () => {
