@@ -5,7 +5,6 @@ import {
   test,
   expect,
   describe,
-  beforeAll,
 } from '@jest/globals';
 
 import genDiff from '../src/index.js';
@@ -13,51 +12,30 @@ import genDiff from '../src/index.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
+const getFixturePath = (fileName) => path.join(__dirname, '..', '__fixtures__', fileName);
 
-let expectedResult;
-let emptyResult;
-
-beforeAll(() => {
-  expectedResult = String(fs.readFileSync(getFixturePath('expected.txt')));
-  emptyResult = '{\n\n}';
-});
+const formats = ['stylish', 'plain'];
+const extensions = [['.json', '.yaml'], ['.json', '.json'], ['.yaml', '.yaml']];
+const testEmptyData = [
+  { format: 'stylish', expected: '{\n\n}' },
+  { format: 'plain', expected: ''.toString() },
+];
 
 describe('test gendiff', () => {
-  test('.json', () => {
-    const file1path = getFixturePath('file1.json');
-    const file2path = getFixturePath('file2.json');
-
-    expect(genDiff(file1path, file2path)).toEqual(expectedResult);
+  describe.each(formats)('format: %s', (format) => {
+    test.each(extensions)('files ext: %s %s', (ext1, ext2) => {
+      const filepath1 = getFixturePath(`file1${ext1}`);
+      const filepath2 = getFixturePath(`file2${ext2}`);
+      const expected = fs.readFileSync(getFixturePath(`expect-${format}.txt`)).toString();
+      expect(genDiff(filepath1, filepath2, format)).toBe(expected);
+    });
   });
-  test('empty .json', () => {
-    const emptyFile1Path = getFixturePath('empty1.json');
-    const emptyFile2Path = getFixturePath('empty2.json');
 
-    expect(genDiff(emptyFile1Path, emptyFile2Path)).toEqual(emptyResult);
-  });
-  test('.yaml', () => {
-    const file1path = getFixturePath('file1.yaml');
-    const file2path = getFixturePath('file2.yaml');
-
-    expect(genDiff(file1path, file2path)).toEqual(expectedResult);
-  });
-  test('empty .yaml', () => {
-    const file1path = getFixturePath('empty1.yaml');
-    const file2path = getFixturePath('empty2.yaml');
-
-    expect(genDiff(file1path, file2path)).toEqual(emptyResult);
-  });
-  test('.yml', () => {
-    const file1path = getFixturePath('file1.yml');
-    const file2path = getFixturePath('file2.yml');
-
-    expect(genDiff(file1path, file2path)).toEqual(expectedResult);
-  });
-  test('empty .yml', () => {
-    const file1path = getFixturePath('empty1.yml');
-    const file2path = getFixturePath('empty2.yml');
-
-    expect(genDiff(file1path, file2path)).toEqual(emptyResult);
+  describe('empty files', () => {
+    test.each(testEmptyData)('$format', ({ format, expected }) => {
+      const filepath1 = getFixturePath('empty.json');
+      const filepath2 = getFixturePath('empty.yaml');
+      expect(genDiff(filepath1, filepath2, format)).toBe(expected);
+    });
   });
 });

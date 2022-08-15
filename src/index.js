@@ -1,12 +1,12 @@
 import isObject from 'lodash/isObject.js';
 import getParser from './parsers.js';
-import getFormattedData from './formatters/stylish.js';
+import getFormattedData from './formatters/index.js';
 
 const checkChildren = (val1, val2) => (
   (isObject(val1) && !Array.isArray(val1)) && (isObject(val2) && !Array.isArray(val2))
 );
 
-const genDiff = (filepath1, filepath2) => {
+const genDiff = (filepath1, filepath2, format = 'stylish') => {
   const fileObj1 = getParser(filepath1);
   const fileObj2 = getParser(filepath2);
 
@@ -29,7 +29,7 @@ const genDiff = (filepath1, filepath2) => {
     });
   };
   const nodes = iter(fileObj1, fileObj2);
-  return getFormattedData(nodes);
+  return getFormattedData(nodes, format);
 };
 
 export default genDiff;

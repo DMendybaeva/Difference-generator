@@ -27,7 +27,7 @@ const stringifyValue = (value, spaceSize) => {
   return value;
 };
 
-const getFormattedData = (nodes) => {
+const getStylishFormat = (nodes) => {
   const iter = ({
     type, key, value, valuesObj, children,
   }, spaceSize = 4) => {
@@ -61,4 +61,4 @@ const getFormattedData = (nodes) => {
   const outputArr = nodes.map((node) => iter(node));
   return makeNestedString(outputArr);
 };
-export default getFormattedData;
+export default getStylishFormat;
