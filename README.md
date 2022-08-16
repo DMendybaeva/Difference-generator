@@ -38,3 +38,5 @@ npm link
 [![asciicast](https://asciinema.org/a/DhY1uw4RKyNA46wVCVdutaCTV.svg)](https://asciinema.org/a/DhY1uw4RKyNA46wVCVdutaCTV)
 ### Nested `.json` files (json format)
 [![asciicast](https://asciinema.org/a/IBHfkkeK0rD7gZ01uTaC2PEyj.svg)](https://asciinema.org/a/IBHfkkeK0rD7gZ01uTaC2PEyj)
+### Authors:
+- Diana Mendybaeva
